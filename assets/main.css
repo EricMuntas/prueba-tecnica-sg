@@ -1,0 +1,5 @@
+.nav-link {
+
+    @apply cursor-pointer hover:bg-blue-400 w-full h-full flex justify-center items-center select-none;
+
+}

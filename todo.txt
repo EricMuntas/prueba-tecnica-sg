@@ -1,0 +1,53 @@
+Las funcionalidades que debe incluir el desarrollo son:
+
+• Acceso un gestor de contenidos:
+
+    - Crear una plantilla de gestor de contenidos o bien usar una plantilla de código libre
+
+    - Los usuarios deben autenticarse, con email y contraseña, antes deentrar al gestor
+    
+
+
+
+
+
+• CRUD 1 (mantenimiento de datos 1):
+
+    - Creación, edición, eliminación categoría de productos.
+
+    - Campos mínimos son: código categoría, nombre categoría, descripción categoría.
+
+    - Se requiere la necesidad de poder tener categoría padre con categorías hijas, por ejemplo: FRUTAS à MANZANA, CARNES à ROJA…
+
+
+
+• CRUD 2 (mantenimiento de datos 2):
+
+    - Creación, edición, eliminación de productos.
+
+    - Los productos tienen una o varias categorías asignadas (creadas en el crud anterior).
+
+    - Los productos tendrán tarifas asociadas. Un producto puede tener varias tarifas creadas en función de fechas (por ejemplo: del
+    01/01/2021 al 01/06/2021 el precio es de 6,90€, del 02/06/2021 al 01/08/2021 el precio es de 4,90€).
+
+    - Campos mínimos son: código producto, nombre producto, descripción producto, foto/fotos del producto, categoría/s, tarifa/s.
+
+    - Desde la sección listado de productos, debe poderse exportar un XLS con los datos de los productos creados.
+
+    - Desde la lista de productos o desde la ficha del producto, se debe
+       poder descargar un PDF con la información del producto en cuestión
+       (no se valorará el diseño, pero si que exporte y muestre toda la
+       información correctamente).
+
+
+• Vista calendario:
+    - La sección debe mostrar un calendario donde permita hacer lo siguiente:
+        -> Poner una cita para recordar que debo comprar x productos.
+            El crud contendría la siguiente información:
+            • Fecha del pedido
+            • Producto a comprar (crud anterior)
+            • Unidades a comprar
+            • Calcular el coste en función de la tarifa que toque.
+   
+    - Una vez guardada la cita anterior, se debería mostrar en el
+calendario el pedido que debo hacer
