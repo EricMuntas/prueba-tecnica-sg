@@ -10,13 +10,15 @@ useHead({
 
     <div class="button-container bg-gray-100 flex justify-center items-center gap-4">
 
-        <NuxtLink to="/">
-            <div class="admin-panel-btn">Crear categorias</div>
+        <NuxtLink to="/admin/list-categories">
+            <div class="admin-panel-btn">Ver categorias</div>
         </NuxtLink>
 
         <NuxtLink to="/">
             <div class="admin-panel-btn">Crear comidas</div>
         </NuxtLink>
+
+
 
     </div>
 

@@ -1,5 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .nav-link {
 
     @apply cursor-pointer hover:bg-blue-400 w-full h-full flex justify-center items-center select-none;
 
+}
+
+.table-container {
+
+    @apply border border-black rounded-xl w-2/3
+}
+
+.table-header {
+
+    @apply border-b border-black rounded-t-xl bg-gray-300
+}
+
+.select-view {
+
+    @apply w-full h-full flex justify-center items-center cursor-pointer hover:bg-gray-500
+}
+
+.form-container {
+
+    @apply flex justify-center flex-col w-1/2 border border-black rounded-xl p-4 gap-2;
+
+}
+
+.form-items {
+
+    @apply flex flex-col;
+
+}
+
+input,
+select {
+
+    @apply bg-gray-100 rounded p-1
+}
+
+textarea {
+    @apply bg-gray-100 rounded p-1 max-h-52 min-h-16
+}
+
+button {
+    @apply bg-blue-500 text-white hover:bg-blue-400 rounded-xl p-2
 }

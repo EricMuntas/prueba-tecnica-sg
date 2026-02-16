@@ -17,7 +17,7 @@
             Entrar
         </NuxtLink>
 
-        <NuxtLink to="/admin-panel" class="nav-link">
+        <NuxtLink to="/admin/admin-panel" class="nav-link">
             Admin Panel
         </NuxtLink>
 
