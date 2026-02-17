@@ -37,14 +37,14 @@ try {
     loading.value = false
 }
 
-const handleRegister = async () => {
+const handleSubmit = async () => {
     loading.value = true
     error.value = ''
     success.value = ''
 
     try {
 
-        if (formData.value.name.trim() !== '') {
+        if (formData.value.name.trim() !== '' && formData.value.description.trim() !== '') {
             if (!formData.value.isSubCategory) {
                 const { error: dbError } = await supabase
                     .from('categories')
@@ -56,30 +56,45 @@ const handleRegister = async () => {
 
                 success.value = 'Categoria creada exitosamente'
 
-            } else {
-                const { error: dbError } = await supabase
-                    .from('sub_categories')
-                    .insert({
-                        name: formData.value.name,
-                        category_id: formData.value.category_id,
-                        description: formData.value.description,
-                    })
-                if (dbError) throw dbError
+                setTimeout(() => {
+                    navigateTo('/admin/list-categories')
+                }, 250)
 
-                success.value = 'Subcategoria creada exitosamente'
+            } else {
+                if (formData.value.category_id != null) {
+                    const { error: dbError } = await supabase
+                        .from('sub_categories')
+                        .insert({
+                            name: formData.value.name,
+                            category_id: formData.value.category_id,
+                            description: formData.value.description,
+                        })
+                    if (dbError) throw dbError
+
+                    success.value = 'Subcategoria creada exitosamente'
+
+                    setTimeout(() => {
+                        navigateTo('/admin/list-categories')
+                    }, 250)
+                }
+                else {
+                    error.value = 'Debes asignar una categoría padre.'
+                    loading.value = false;
+                }
+
+
             }
 
         } else {
-            error.value = "No puedes dejar el nombre en blanco."
+            error.value = "No puedes dejar el nombre ni la descripción en blanco."
+            loading.value = false;
         }
 
     } catch (err) {
         error.value = err.message
     } finally {
         // loading.value = false
-        setTimeout(() => {
-            navigateTo('/admin/list-categories')
-        }, 1000)
+
     }
 
 }
@@ -89,7 +104,7 @@ const handleRegister = async () => {
 </script>
 <template>
     <div class="flex justify-center items-center w-full mt-20">
-        <form @submit.prevent="handleRegister" class="form-container">
+        <form @submit.prevent="handleSubmit" class="form-container">
 
             <div class="form-items">
                 <label for="name">
@@ -114,7 +129,7 @@ const handleRegister = async () => {
             <div v-if="formData.isSubCategory" class="form-items">
                 <label for="father-category">Categoría padre:</label>
                 <select v-model="formData.category_id" name="father-category" id="">
-                    <option value="" disabled="" selected>Selecciona una categoría...</option>
+                    <option value="null" disabled="" selected>Selecciona una categoría...</option>
                     <option v-for="category in categories" :key="category.id" :value="category.id"> {{ category.name }}
                     </option>
                 </select>

@@ -48,3 +48,8 @@ textarea {
 button {
     @apply bg-blue-500 text-white hover:bg-blue-400 rounded-xl p-2
 }
+
+.error {
+
+    @apply text-red-500
+}

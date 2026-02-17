@@ -1,4 +1,7 @@
 <script setup>
+import { Eye, Pencil } from 'lucide-vue-next';
+
+
 
 const props = defineProps({
     subcategories: Object,
@@ -21,7 +24,7 @@ const getCategory = (categoryId) => {
 </script>
 
 <template>
-    <div class="flex flex-col justify-center items-center gap-4 mt-4">
+    <div v-if="subcategories.length > 0" class="flex flex-col justify-center items-center gap-4 mt-4">
         <h1>Subcategorias</h1>
         <div class="table-container">
             <div class="table-header grid grid-cols-8 p-1">
@@ -36,8 +39,13 @@ const getCategory = (categoryId) => {
                 <span class="col-span-1">{{ getCategory(subcategory.category_id) }}</span>
                 <span class="col-span-3 break-words">{{ subcategory.description }}</span>
                 <span class="col-span-2"> {{ getDate(subcategory.created_at) }} </span>
-                <span class="col-span-1">Eye</span>
+                <span class="col-span-1">
+                    <Pencil></Pencil>
+                </span>
             </div>
         </div>
+    </div>
+    <div v-else>
+        <p>No hay subcategorías</p>
     </div>
 </template>
