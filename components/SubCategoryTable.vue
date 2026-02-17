@@ -40,7 +40,9 @@ const getCategory = (categoryId) => {
                 <span class="col-span-3 break-words">{{ subcategory.description }}</span>
                 <span class="col-span-2"> {{ getDate(subcategory.created_at) }} </span>
                 <span class="col-span-1">
-                    <Pencil></Pencil>
+                    <NuxtLink :to="`/admin/subcategories/${subcategory.id}`">
+                        <Pencil></Pencil>
+                    </NuxtLink>
                 </span>
             </div>
         </div>
