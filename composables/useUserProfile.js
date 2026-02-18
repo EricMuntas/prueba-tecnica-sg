@@ -7,7 +7,6 @@ export const useUserProfile = () => {
 
     const fetchProfile = async () => {
         if (!user.value?.sub) {
-            console.log('No user ID available yet')
             return
         }
 
@@ -26,7 +25,6 @@ export const useUserProfile = () => {
 
             if (data) {
                 profile.value = data
-                console.log('Profile loaded successfully:', data)
             }
         } catch (err) {
             console.error('Exception fetching profile:', err)

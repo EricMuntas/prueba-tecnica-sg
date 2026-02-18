@@ -34,17 +34,16 @@ const handleDelete = async () => {
             console.error('Error al borrar la categoría:', error)
         } else {
 
-            console.log('Categoría borrada');
 
             setTimeout(() => {
-                navigateTo('/admin/list-categories')
+                // navigateTo('/admin/list-categories')
+                window.location.reload();
             }, 250);
 
         }
 
 
     } catch (error) {
-        console.log(error)
     }
 
 

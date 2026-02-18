@@ -17,7 +17,6 @@ try {
 
         if (data) {
             categories.value = data
-            console.log('Categorias cargadas existosamente:', data)
         }
 
     }
@@ -31,7 +30,6 @@ try {
 
     if (data) {
         subcategories.value = data
-        console.log('Categorias cargadas existosamente:', data)
     }
 
 } catch (err) {

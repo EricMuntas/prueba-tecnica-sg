@@ -14,8 +14,8 @@ useHead({
             <div class="admin-panel-btn">Ver categorias</div>
         </NuxtLink>
 
-        <NuxtLink to="/">
-            <div class="admin-panel-btn">Crear comidas</div>
+        <NuxtLink to="/admin/list-products">
+            <div class="admin-panel-btn">Ver productos</div>
         </NuxtLink>
 
 

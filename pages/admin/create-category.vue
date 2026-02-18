@@ -29,7 +29,6 @@ try {
 
     if (data) {
         categories.value = data
-        console.log('Categorias cargadas existosamente:', data)
     }
 } catch (err) {
     console.error('Exception fetching profile:', err)

@@ -6,13 +6,7 @@ useHead({
   title: 'Index'
 })
 const user = useSupabaseUser() ?? null;
-console.log('user-----------------------')
-console.log(user.value);
-console.log('-----------------------')
-console.log('auth-----------------------')
 const { profile, loading } = useUserProfile()
-console.log(profile.value)
-console.log('-----------------------')
 </script>
 <template>
   <div>
