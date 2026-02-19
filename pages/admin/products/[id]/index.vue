@@ -1,5 +1,6 @@
 <script setup>
 import { X } from 'lucide-vue-next';
+import jsPDF from 'jspdf'
 
 const loading = ref(false)
 const error = ref('')
@@ -63,7 +64,6 @@ try {
     loading.value = false
 }
 
-// 2. Cargar datos del producto y pre-rellenar categorías/subcategorías seleccionadas
 try {
     const { data: product, error: errorProduct } = await supabase
         .from('products')
@@ -71,13 +71,11 @@ try {
         .eq('id', product_id)
         .single();
 
-    // ✅ Seleccionar category_id, no id
     const { data: productCategories, error: errorCategories } = await supabase
         .from('products_categories')
         .select('category_id')
         .eq('product_id', product_id);
 
-    // ✅ Seleccionar subcategory_id, no id
     const { data: productSubcategories, error: errorSubcategories } = await supabase
         .from('products_subcategories')
         .select('subcategory_id')
@@ -295,6 +293,53 @@ const openDeleteModal = (id) => {
 const closeDeleteModal = () => {
     isDeleteModalOpen.value = false
 }
+const exportToPDF = async () => {
+    try {
+        const { data: product } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', product_id)
+            .single()
+
+        const { data: productCategories } = await supabase
+            .from('products_categories')
+            .select('category_id, categories(name)')
+            .eq('product_id', product_id)
+
+        const { data: productSubcategories } = await supabase
+            .from('products_subcategories')
+            .select('subcategory_id, sub_categories(name)')
+            .eq('product_id', product_id)
+
+        const doc = new jsPDF()
+        let y = 20
+
+        doc.setFontSize(18)
+        doc.text('Ficha de Producto', 14, y)
+        y += 12
+
+        doc.setFontSize(12)
+        doc.text(`ID: ${product.id}`, 14, y); y += 8
+        doc.text(`Nombre: ${product.name}`, 14, y); y += 8
+
+        // Descripción con salto de línea automático
+        const descLines = doc.splitTextToSize(`Descripción: ${product.description}`, 180)
+        doc.text(descLines, 14, y); y += descLines.length * 7 + 4
+
+        // Categorías
+        const catNames = (productCategories || []).map(c => c.categories?.name).filter(Boolean).join(', ')
+        doc.text(`Categorías: ${catNames || '—'}`, 14, y); y += 8
+
+        // Subcategorías
+        const subNames = (productSubcategories || []).map(s => s.sub_categories?.name).filter(Boolean).join(', ')
+        doc.text(`Subcategorías: ${subNames || '—'}`, 14, y); y += 8
+
+        doc.save(`producto_${product_id}.pdf`)
+
+    } catch (err) {
+        error.value = 'Error al exportar PDF: ' + err.message
+    }
+}
 </script>
 
 <template>
@@ -393,7 +438,10 @@ const closeDeleteModal = () => {
                     <span>Ver tarifas</span>
                 </button>
             </NuxtLink>
-
+            <button type="button" @click="exportToPDF" :disabled="loading"
+                class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-400 w-full">
+                <span>Exportar a PDF</span>
+            </button>
         </form>
     </div>
     <DeleteModal v-if="isDeleteModalOpen" table="products" :id="Number(product_id)" @close="closeDeleteModal"
