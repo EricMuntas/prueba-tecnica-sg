@@ -283,10 +283,32 @@ const getSubcategoryName = (subcategoryId) => {
     const subcategory = subcategories.value.find(cat => cat.id === Number(subcategoryId));
     return subcategory ? subcategory.name : 'Error';
 }
+// borrar modal
+const isDeleteModalOpen = ref(false);
+const feeToDelete = ref(null);
+
+const openDeleteModal = (id) => {
+    isDeleteModalOpen.value = true
+    feeToDelete.value = id;
+}
+
+const closeDeleteModal = () => {
+    isDeleteModalOpen.value = false
+}
 </script>
 
 <template>
-    <div class="flex justify-center items-center w-full mt-20">
+    <div class="mt-4 flex justify-center items-center">
+        <NuxtLink :to="`/admin/list-products`">
+            <button type="button"
+                class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 w-full">
+
+                <span>Volver al producto</span>
+            </button>
+        </NuxtLink>
+    </div>
+    <div class="flex justify-center items-center w-full mt-4">
+
         <form @submit.prevent="handleSubmit" class="form-container">
 
             <div class="form-items">
@@ -360,6 +382,10 @@ const getSubcategoryName = (subcategoryId) => {
                 <span>{{ loading ? 'Guardando...' : 'Guardar cambios' }}</span>
             </button>
 
+            <button type="button" :disabled="loading" :class="loading ? 'bg-red-300' : 'bg-red-500 hover:bg-red-400'"
+                class="text-white rounded-xl p-2 flex items-center justify-center gap-2" v-on:click="openDeleteModal">
+                <span>Eliminar</span>
+            </button>
             <NuxtLink :to="`/admin/products/${product_id}/fees`">
                 <button type="button"
                     class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 w-full">
@@ -370,4 +396,6 @@ const getSubcategoryName = (subcategoryId) => {
 
         </form>
     </div>
+    <DeleteModal v-if="isDeleteModalOpen" table="products" :id="Number(product_id)" @close="closeDeleteModal"
+        :redirect="`/admin/list-products`" />
 </template>

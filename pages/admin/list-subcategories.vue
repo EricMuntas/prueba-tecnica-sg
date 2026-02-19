@@ -20,13 +20,31 @@ try {
         }
 
     }
+    const { data, error } = await supabase
+        .from('sub_categories')
+        .select('*')
+
+    if (error) {
+        console.error('Error al obtener subcategorias:', error)
+    }
+
+    if (data) {
+        subcategories.value = data
+    }
+
 } catch (err) {
     console.error('Exception fetching profile:', err)
 } finally {
     loading.value = false
 }
 
+
+
+const viewSelector = ref('categories');
+
 </script>
+
+
 <template>
 
     <NuxtLink to="/admin/create-category">
@@ -44,7 +62,7 @@ try {
         </NuxtLink>
     </div>
 
-    <CategoryTable :categories="categories"></CategoryTable>
 
+    <SubCategoryTable :subcategories="subcategories" :categories="categories"></SubCategoryTable>
 
 </template>

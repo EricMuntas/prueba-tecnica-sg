@@ -161,7 +161,15 @@ const closeDeleteModal = () => {
 </script>
 
 <template>
+
     <div v-if="fees.length > 0" class="flex flex-col justify-center items-center gap-4 mt-4">
+        <NuxtLink :to="`/admin/products/${product_id}`" class="mt-4">
+            <button type="button"
+                class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 w-full">
+
+                <span>Volver al producto</span>
+            </button>
+        </NuxtLink>
         <h1>Tarifas</h1>
         <div class="table-container">
             <div class="table-header grid grid-cols-12 p-1">
@@ -222,7 +230,8 @@ const closeDeleteModal = () => {
     <div v-else>
         <p>No hay tarifas</p>
     </div>
-    <DeleteModal v-if="isDeleteModalOpen" table="fees" :id="Number(feeToDelete)" @close="closeDeleteModal" />
+    <DeleteModal v-if="isDeleteModalOpen" table="fees" :id="Number(feeToDelete)" @close="closeDeleteModal"
+        :redirect="`/admin/products/${product_id}/fees`" />
 </template>
 
 <style scoped>

@@ -163,6 +163,7 @@ const handleSubmit = async () => {
 
         </form>
 
-        <DeleteModal v-if="isDeleteModalOpen" table="sub_categories" :id="Number(id)" @close="closeDeleteModal" />
+        <DeleteModal v-if="isDeleteModalOpen" table="sub_categories" :id="Number(id)" @close="closeDeleteModal"
+            :redirect="`/admin/list-subcategories`" />
     </div>
 </template>

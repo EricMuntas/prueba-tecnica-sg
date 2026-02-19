@@ -1,17 +1,23 @@
 <script setup>
+import Default from '~/layouts/default.vue';
+
 const supabase = useSupabaseClient();
 
 const props = defineProps({
 
     table: String,
     id: Number,
-
+    redirect: {
+        type: String,
+        default: '/admin/admin-panel',
+    }
 })
 
 const emit = defineEmits(['close'])
 
 const table = ref(props.table);
 const idToDelete = ref(props.id);
+const redirect = ref(props.redirect);
 
 const loading = ref(false)
 const error = ref('')
@@ -37,7 +43,7 @@ const handleDelete = async () => {
 
             setTimeout(() => {
                 // navigateTo('/admin/list-categories')
-                window.location.reload();
+                navigateTo(redirect.value);
             }, 250);
 
         }
