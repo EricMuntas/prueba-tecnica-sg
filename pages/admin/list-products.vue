@@ -1,6 +1,8 @@
 <script setup>
 import * as XLSX from 'xlsx'
-
+definePageMeta({
+    middleware: 'admin'
+})
 const supabase = useSupabaseClient();
 
 const products = ref(null);

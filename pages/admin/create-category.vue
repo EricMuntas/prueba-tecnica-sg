@@ -1,5 +1,7 @@
 <script setup>
-
+definePageMeta({
+    middleware: 'admin'
+})
 const loading = ref(false)
 const error = ref('')
 const success = ref('')

@@ -3,6 +3,9 @@ useHead({
 
     title: 'Admin'
 })
+definePageMeta({
+    middleware: 'admin'
+})
 </script>
 
 

@@ -1,4 +1,7 @@
 <script setup>
+definePageMeta({
+    middleware: 'admin'
+})
 const loading = ref(false)
 
 const supabase = useSupabaseClient();

@@ -1,4 +1,7 @@
 <script setup>
+definePageMeta({
+    middleware: 'admin'
+})
 const supabase = useSupabaseClient();
 
 const categories = ref(null);

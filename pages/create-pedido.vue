@@ -7,8 +7,11 @@ const success = ref(false);
 
 const supabase = useSupabaseClient();
 
+const user = useSupabaseUser();
+
 const formData = ref({
     products: [],
+    date: '',
 });
 
 const allProducts = ref([]);
@@ -63,7 +66,7 @@ const handleSubmit = async () => {
     try {
         const { data: pedido, error: pedidoError } = await supabase
             .from('pedidos')
-            .insert({ cost: totalImporte.value })
+            .insert({ cost: totalImporte.value, user_id: user.value.sub, date: formData.value.date })
             .select()
             .single();
 
@@ -177,6 +180,11 @@ const handleDeleteProduct = (product) => {
 
             <div class="mt-2 text-right font-bold">
                 <p>Importe total: {{ totalImporte.toFixed(2) }}€</p>
+            </div>
+
+            <div class="mt-2 font-bold">
+                <label for="date">Fecha:</label>
+                <input v-model="formData.date" type="date" name="date" id="">
             </div>
 
             <button type="submit" :disabled="loading" :class="loading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-400'"

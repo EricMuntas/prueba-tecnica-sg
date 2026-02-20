@@ -1,6 +1,8 @@
 <script setup>
 import { X } from 'lucide-vue-next';
-
+definePageMeta({
+    middleware: 'admin'
+})
 
 const loading = ref(false)
 const error = ref('')

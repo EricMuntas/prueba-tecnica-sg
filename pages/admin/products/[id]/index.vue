@@ -1,6 +1,9 @@
 <script setup>
 import { X } from 'lucide-vue-next';
 import jsPDF from 'jspdf'
+definePageMeta({
+    middleware: 'admin'
+})
 
 const loading = ref(false)
 const error = ref('')
