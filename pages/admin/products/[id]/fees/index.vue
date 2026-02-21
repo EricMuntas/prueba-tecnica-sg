@@ -37,5 +37,9 @@ try {
 
 </script>
 <template>
-    <FeeTable :fees="fees" :product_id="product_id"></FeeTable>
+    <div class="page-wrapper">
+        <div class="w-full max-w-5xl">
+            <FeeTable :fees="fees" :product_id="product_id"></FeeTable>
+        </div>
+    </div>
 </template>

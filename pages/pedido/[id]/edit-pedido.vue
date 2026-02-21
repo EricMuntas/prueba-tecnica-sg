@@ -1,7 +1,10 @@
 <script setup>
 import { X } from 'lucide-vue-next';
 
-useHead({ title: 'Crear Pedido — PedidosApp' })
+useHead({ title: 'Editar Pedido — PedidosApp' })
+
+const route = useRoute();
+const pedidoId = Number(route.params.id);
 
 const loading = ref(false);
 const error = ref(false);
@@ -51,6 +54,43 @@ const getPriceForProduct = async (productId) => {
     return reciente?.price ?? 0;
 };
 
+const loadPedido = async () => {
+    try {
+        const { data: pedido, error: pedidoError } = await supabase
+            .from('pedidos')
+            .select('id, date, cost, user_id')
+            .eq('id', pedidoId)
+            .single();
+
+        if (pedidoError) return navigateTo('/unauthorized');
+        if (pedido.user_id !== user.value.sub) return navigateTo('/unauthorized');
+
+        formData.value.date = pedido.date ?? '';
+
+        const { data: lines, error: linesError } = await supabase
+            .from('pedidos_products')
+            .select('product_id, quantity')
+            .eq('pedido_id', pedidoId);
+
+        if (linesError) throw linesError;
+
+        formData.value.products = await Promise.all(
+            lines.map(async (line) => {
+                const product = allProducts.value.find(p => p.id === line.product_id);
+                const price = await getPriceForProduct(line.product_id);
+                return {
+                    ...(product ?? { id: line.product_id, name: 'Producto desconocido' }),
+                    quantity: line.quantity,
+                    price,
+                };
+            })
+        );
+
+    } catch (e) {
+        error.value = e.message;
+    }
+};
+
 const handleSubmit = async () => {
     if (formData.value.products.length === 0) {
         error.value = 'Añade al menos un producto';
@@ -62,16 +102,22 @@ const handleSubmit = async () => {
     success.value = false;
 
     try {
-        const { data: pedido, error: pedidoError } = await supabase
+        const { error: pedidoError } = await supabase
             .from('pedidos')
-            .insert({ cost: totalImporte.value, user_id: user.value.sub, date: formData.value.date })
-            .select()
-            .single();
+            .update({ cost: totalImporte.value, date: formData.value.date })
+            .eq('id', pedidoId);
 
         if (pedidoError) throw pedidoError;
 
+        const { error: deleteError } = await supabase
+            .from('pedidos_products')
+            .delete()
+            .eq('pedido_id', pedidoId);
+
+        if (deleteError) throw deleteError;
+
         const pedidoProducts = formData.value.products.map(item => ({
-            pedido_id: pedido.id,
+            pedido_id: pedidoId,
             product_id: item.id,
             quantity: item.quantity,
         }));
@@ -82,9 +128,7 @@ const handleSubmit = async () => {
 
         if (productsError) throw productsError;
 
-        success.value = 'Pedido creado correctamente';
-        formData.value.products = [];
-        formData.value.date = '';
+        success.value = 'Pedido actualizado correctamente';
 
     } catch (e) {
         error.value = e.message;
@@ -100,6 +144,8 @@ try {
 } catch (e) {
     error.value = e.message;
 }
+
+await loadPedido();
 
 watch(searchingProduct, (newValue) => {
     if (!newValue || newValue.trim() === '') {
@@ -127,16 +173,32 @@ const handleDeleteProduct = (product) => {
         formData.value.products.splice(index, 1);
     }
 };
+
+const isDeleteModalOpen = ref(false);
+const openDeleteModal = () => { isDeleteModalOpen.value = true };
+const closeDeleteModal = () => { isDeleteModalOpen.value = false };
 </script>
 
 <template>
     <div class="pt-24 pb-12 px-6 max-w-3xl mx-auto">
 
         <!-- Page header -->
-        <div class="mb-8">
-            <p class="text-sm text-indigo-400 font-medium mb-1">Pedidos</p>
-            <h1 class="text-2xl font-bold text-white">Crear nuevo pedido</h1>
-            <p class="text-slate-400 text-sm mt-1">Busca productos y añádelos a tu pedido</p>
+        <div class="mb-8 flex items-start justify-between">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <p class="text-sm text-indigo-400 font-medium">Pedidos</p>
+                    <span class="badge badge-indigo">Editando #{{ pedidoId }}</span>
+                </div>
+                <h1 class="text-2xl font-bold text-white">Editar pedido</h1>
+                <p class="text-slate-400 text-sm mt-1">Modifica los productos o la fecha del pedido</p>
+            </div>
+            <NuxtLink to="/" class="btn-secondary text-sm flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Volver
+            </NuxtLink>
         </div>
 
         <form @submit.prevent="handleSubmit" class="flex flex-col gap-6">
@@ -149,11 +211,11 @@ const handleDeleteProduct = (product) => {
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    Buscar producto
+                    Añadir producto
                 </h2>
                 <div class="form-items relative">
                     <input v-model="searchingProduct" type="text" name="search-bar" id="search-bar"
-                        placeholder="Escribe el nombre del producto..." />
+                        placeholder="Buscar producto..." />
                     <div v-if="showingAllProducts.length > 0"
                         class="dropdown-container absolute left-0 right-0 top-full z-10">
                         <div v-for="product in showingAllProducts" :key="product.id" class="dropdown-item"
@@ -226,33 +288,47 @@ const handleDeleteProduct = (product) => {
                             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
                     </svg>
                 </div>
-                <p class="text-slate-400 text-sm">Aún no has añadido productos.<br>Usa el buscador para añadir.</p>
+                <p class="text-slate-400 text-sm">No hay productos en este pedido.<br>Usa el buscador para añadir.</p>
             </div>
 
-            <!-- Date + Submit -->
+            <!-- Date + Actions -->
             <div class="card-glass p-5 flex flex-col sm:flex-row sm:items-end gap-4">
                 <div class="form-items flex-1">
                     <label for="date" class="form-label">Fecha del pedido</label>
                     <input v-model="formData.date" type="date" name="date" id="date" />
                 </div>
-                <button type="submit" :disabled="loading"
-                    class="btn-primary flex items-center justify-center gap-2 sm:w-auto w-full">
-                    <svg v-if="loading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                        </path>
-                    </svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    {{ loading ? 'Creando...' : 'Crear pedido' }}
-                </button>
+                <div class="flex gap-3">
+                    <button type="button" :disabled="loading" @click="openDeleteModal"
+                        class="btn-danger flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Eliminar
+                    </button>
+                    <button type="submit" :disabled="loading"
+                        class="btn-primary flex items-center justify-center gap-2">
+                        <svg v-if="loading" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {{ loading ? 'Guardando...' : 'Guardar cambios' }}
+                    </button>
+                </div>
             </div>
 
         </form>
     </div>
+
+    <DeleteModal v-if="isDeleteModalOpen" table="pedidos" :id="Number(pedidoId)" @close="closeDeleteModal"
+        :redirect="`/`" />
 </template>

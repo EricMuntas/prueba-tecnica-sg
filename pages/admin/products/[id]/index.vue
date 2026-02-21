@@ -346,107 +346,253 @@ const exportToPDF = async () => {
 </script>
 
 <template>
-    <div class="mt-4 flex justify-center items-center">
-        <NuxtLink :to="`/admin/list-products`">
-            <button type="button"
-                class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 w-full">
+    <div class="page-wrapper">
+        <div class="w-full max-w-4xl">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+                <div>
+                    <div
+                        class="flex items-center gap-2 text-slate-500 text-xs font-medium uppercase tracking-wider mb-2">
+                        <NuxtLink to="/admin/list-products" class="hover:text-indigo-400 transition-colors">Productos
+                        </NuxtLink>
+                        <span>/</span>
+                        <span class="text-slate-300">Editar producto</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-white">Editar producto</h1>
+                </div>
 
-                <span>Volver al producto</span>
-            </button>
-        </NuxtLink>
-    </div>
-    <div class="flex justify-center items-center w-full mt-4">
-
-        <form @submit.prevent="handleSubmit" class="form-container">
-
-            <div class="form-items">
-                <label for="name">Nombre:</label>
-                <input v-model="formData.name" type="text" name="name" placeholder="Nombre...">
-            </div>
-
-            <div class="form-items">
-                <label for="description">Descripción:</label>
-                <textarea v-model="formData.description" name="description" placeholder="Descripción..."></textarea>
-            </div>
-
-            <div>
-                <label for="father-category">Categoría:</label>
-                <select v-on:change="handleCategoryChange" name="father-category">
-                    <option value="null" disabled selected>Selecciona una categoría...</option>
-                    <option v-for="category in categories" :key="category.id" :value="category.id">
-                        {{ category.name }}
-                    </option>
-                </select>
-                <div class="flex flex-row gap-4">
-                    <p>Seleccionado:</p>
-                    <p v-for="selectedCategory in selectedCategories" class="flex flex-row items-center gap-1">
-                        {{ getCategoryName(selectedCategory) }}
-                        <span v-on:click="deleteSelectedCategory(selectedCategory)">
-                            <X class="size-4 cursor-pointer"></X>
-                        </span>
-                    </p>
+                <div class="flex items-center gap-3">
+                    <button @click="exportToPDF" :disabled="loading"
+                        class="btn-secondary flex items-center gap-2 border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Exportar PDF</span>
+                    </button>
+                    <NuxtLink :to="`/admin/products/${product_id}/fees`"
+                        class="btn-secondary flex items-center gap-2 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Gestionar tarifas</span>
+                    </NuxtLink>
+                    <NuxtLink to="/admin/list-products" class="btn-secondary flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Volver</span>
+                    </NuxtLink>
                 </div>
             </div>
 
-            <div v-if="selectedCategories.length > 0">
-                <label for="sub-category">Subcategoría:</label>
-                <select v-on:change="handleSubcategoryChange" name="sub-category">
-                    <option value="null" disabled selected>Selecciona una subcategoría...</option>
-                    <option v-for="subcategory in subcategoriesByCategory" :key="subcategory.id"
-                        :value="subcategory.id">
-                        {{ subcategory.name }}
-                    </option>
-                </select>
-                <div class="flex flex-row gap-4">
-                    <p>Seleccionado:</p>
-                    <p v-for="selectedSubcategory in selectedSubcategories" class="flex flex-row items-center gap-1">
-                        {{ getSubcategoryName(selectedSubcategory) }}
-                        <span v-on:click="deleteSelectedSubcategory(selectedSubcategory)">
-                            <X class="size-4 cursor-pointer"></X>
-                        </span>
-                    </p>
+            <form @submit.prevent="handleSubmit" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Left Column: Basic Info & Categories -->
+                <div class="space-y-6">
+                    <div class="form-container">
+                        <h2
+                            class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-indigo-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Información general
+                        </h2>
+
+                        <div class="form-items text-white">
+                            <label for="name" class="form-label">Nombre del producto</label>
+                            <input v-model="formData.name" type="text" name="name" id="name"
+                                placeholder="Ej: Hamburguesa Suprema...">
+                        </div>
+
+                        <div class="form-items text-white">
+                            <label for="description" class="form-label">Descripción detallada</label>
+                            <textarea v-model="formData.description" name="description" id="description"
+                                placeholder="Ingredientes, alérgenos, etc..." rows="6"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <h2
+                            class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-amber-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            Categorización
+                        </h2>
+
+                        <div class="form-items text-white">
+                            <label for="categories" class="form-label">Añadir Categoría</label>
+                            <select @change="handleCategoryChange" name="categories" id="categories">
+                                <option value="null" disabled selected>Selecciona una categoría...</option>
+                                <option v-for="category in categories" :key="category.id" :value="category.id">
+                                    {{ category.name }}
+                                </option>
+                            </select>
+
+                            <!-- Chips -->
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <div v-for="catId in selectedCategories" :key="catId"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm">
+                                    <span>{{ getCategoryName(catId) }}</span>
+                                    <button type="button" @click="deleteSelectedCategory(catId)"
+                                        class="hover:text-white transition-colors">
+                                        <X class="size-3.5"></X>
+                                    </button>
+                                </div>
+                                <p v-if="selectedCategories.length === 0" class="text-slate-500 text-xs italic">Ninguna
+                                    categoría seleccionada</p>
+                            </div>
+                        </div>
+
+                        <div v-if="selectedCategories.length > 0"
+                            class="form-items text-white mt-4 border-t border-white/5 pt-4">
+                            <label for="subcategories" class="form-label">Añadir Subcategoría</label>
+                            <select @change="handleSubcategoryChange" name="subcategories" id="subcategories">
+                                <option value="null" disabled selected>Selecciona una subcategoría...</option>
+                                <option v-for="sub in subcategoriesByCategory" :key="sub.id" :value="sub.id">
+                                    {{ sub.name }}
+                                </option>
+                            </select>
+
+                            <!-- Chips -->
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <div v-for="subId in selectedSubcategories" :key="subId"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm">
+                                    <span>{{ getSubcategoryName(subId) }}</span>
+                                    <button type="button" @click="deleteSelectedSubcategory(subId)"
+                                        class="hover:text-white transition-colors">
+                                        <X class="size-3.5"></X>
+                                    </button>
+                                </div>
+                                <p v-if="selectedSubcategories.length === 0" class="text-slate-500 text-xs italic">
+                                    Ninguna subcategoría seleccionada</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="flex flex-col gap-2">
-                <label>Fotos (máx. 3):</label>
-                <input type="file" accept="image/*" multiple @change="handlePhotos">
-            </div>
+                <!-- Right Column: Initial Fee & Photos -->
+                <div class="space-y-6">
+                    <div class="form-container">
+                        <h2
+                            class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-emerald-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Tarifa inicial
+                        </h2>
 
-            <p v-if="error" class="error">{{ error }}</p>
-            <p v-if="success" class="success">{{ success }}</p>
-            <button type="submit" :disabled="loading" :class="loading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-400'"
-                class="text-white rounded-xl p-2 flex items-center justify-center gap-2">
-                <span v-if="loading" class="spinner">
-                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                        </path>
-                    </svg>
-                </span>
-                <span>{{ loading ? 'Guardando...' : 'Guardar cambios' }}</span>
-            </button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-items text-white">
+                                <label for="start-day" class="form-label">Fecha inicio</label>
+                                <input v-model="formData.start_day" type="date" name="start-day" id="start-day">
+                            </div>
+                            <div class="form-items text-white">
+                                <label for="end-day" class="form-label">Fecha fin</label>
+                                <input v-model="formData.end_day" type="date" name="end-day" id="end-day">
+                            </div>
+                        </div>
 
-            <button type="button" :disabled="loading" :class="loading ? 'bg-red-300' : 'bg-red-500 hover:bg-red-400'"
-                class="text-white rounded-xl p-2 flex items-center justify-center gap-2" v-on:click="openDeleteModal">
-                <span>Eliminar</span>
-            </button>
-            <NuxtLink :to="`/admin/products/${product_id}/fees`">
-                <button type="button"
-                    class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 w-full">
+                        <div class="form-items text-white mt-2">
+                            <label for="price" class="form-label">Precio (€)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs">€</span>
+                                <input v-model="formData.price" type="number" step="0.01" min="0" name="price"
+                                    id="price" placeholder="0.00" class="pl-8">
+                            </div>
+                        </div>
 
-                    <span>Ver tarifas</span>
-                </button>
-            </NuxtLink>
-            <button type="button" @click="exportToPDF" :disabled="loading"
-                class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-red-500 hover:bg-red-400 w-full">
-                <span>Exportar a PDF</span>
-            </button>
-        </form>
+                        <p
+                            class="text-[10px] text-slate-500 mt-2 bg-white/5 p-2 rounded-lg leading-tight uppercase tracking-tight italic">
+                            Nota: Para editar tarifas históricas o añadir nuevas, utiliza el botón "Gestionar tarifas"
+                            en la cabecera.
+                        </p>
+                    </div>
+
+                    <div class="form-container">
+                        <h2
+                            class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-purple-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Material visual
+                        </h2>
+
+                        <div class="form-items text-white">
+                            <label for="photos" class="form-label">Actualizar fotos (Máx. 3)</label>
+                            <label class="photo-upload-zone group">
+                                <input type="file" id="photos" accept="image/*" multiple @change="handlePhotos"
+                                    class="hidden">
+                                <div class="flex flex-col items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="size-8 text-slate-500 group-hover:text-indigo-400 transition-colors mb-2"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <span class="text-sm font-medium text-slate-400 group-hover:text-slate-300">Arrastra
+                                        o haz click para subir</span>
+                                    <span class="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">Formatos:
+                                        JPG, PNG, WEBP</span>
+                                </div>
+                            </label>
+
+                            <div v-if="photoFiles.length > 0" class="mt-4">
+                                <p class="text-xs font-semibold text-indigo-400 mb-2 uppercase tracking-wider">Archivos
+                                    preparados:</p>
+                                <ul class="space-y-1">
+                                    <li v-for="(file, idx) in photoFiles" :key="idx"
+                                        class="text-xs text-slate-400 flex items-center justify-between bg-white/5 px-2 py-1.5 rounded-lg border border-white/5">
+                                        <span class="truncate max-w-[150px]">{{ file.name }}</span>
+                                        <span class="text-[10px] text-slate-600">{{ (file.size / 1024).toFixed(1) }}
+                                            KB</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] text-slate-500 mt-2 italic leading-tight uppercase tracking-tight">
+                            Nota: Subir nuevas fotos reemplazará las actuales del producto.
+                        </p>
+                    </div>
+
+                    <div v-if="error || success" class="p-4 rounded-xl border"
+                        :class="error ? 'bg-red-500/10 border-red-500/20' : 'bg-emerald-500/10 border-emerald-500/20'">
+                        <p class="text-sm text-center font-medium" :class="error ? 'text-red-400' : 'text-emerald-400'">
+                            {{ error || success }}
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <button type="submit" :disabled="loading"
+                            class="btn-primary w-full py-4 text-base flex items-center justify-center gap-3">
+                            <span v-if="loading"
+                                class="animate-spin size-5 border-2 border-white/30 border-t-white rounded-full"></span>
+                            <span>{{ loading ? 'Sincronizando...' : 'Guardar cambios' }}</span>
+                        </button>
+
+                        <button type="button" :disabled="loading" @click="openDeleteModal"
+                            class="w-full py-4 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-all font-semibold text-sm">
+                            Eliminar producto
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <DeleteModal v-if="isDeleteModalOpen" table="products" :id="Number(product_id)" @close="closeDeleteModal"
+            :redirect="`/admin/list-products`" />
     </div>
-    <DeleteModal v-if="isDeleteModalOpen" table="products" :id="Number(product_id)" @close="closeDeleteModal"
-        :redirect="`/admin/list-products`" />
 </template>

@@ -101,16 +101,48 @@ function exportToXLS() {
 </script>
 
 <template>
-    <NuxtLink to="/admin/create-product">
-        <div class="w-full h-10 bg-purple-500 hover:bg-purple-400 text-white flex justify-evenly items-center">
-            CREAR PRODUCTO
+    <div class="page-wrapper">
+        <div class="max-w-6xl w-full mx-auto">
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+                <div>
+                    <div class="flex items-center gap-2 mb-2 text-indigo-400">
+                        <NuxtLink to="/admin/admin-panel" class="hover:text-indigo-300 transition-colors">Panel Admin
+                        </NuxtLink>
+                        <span>/</span>
+                        <span class="font-semibold uppercase tracking-wider text-xs">Inventario</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-white">Gestión de Productos</h1>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="button" @click="exportToXLS" :disabled="!products"
+                        class="btn-secondary flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Exportar Excel</span>
+                    </button>
+                    <NuxtLink to="/admin/create-product" class="btn-primary flex items-center gap-2 group">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Nuevo Producto</span>
+                    </NuxtLink>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="relative mt-8">
+                <div v-if="loading" class="flex justify-center p-20">
+                    <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+                <ProductTable v-else :products="products"></ProductTable>
+            </div>
         </div>
-    </NuxtLink>
-    <div class="mt-4 flex justify-center items-center">
-        <button type="button" @click="exportToXLS" :disabled="!products"
-            class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed">
-            <span>Exportar a XLS</span>
-        </button>
     </div>
-    <ProductTable :products="products"></ProductTable>
 </template>

@@ -126,9 +126,9 @@ const getStatus = (fee) => {
 
 const getStatusClass = (fee) => {
     const status = getStatus(fee);
-    if (status === 'Próximamente') return 'text-blue-500';
-    if (status === 'Vigente') return 'text-green-500';
-    return 'text-red-500';
+    if (status === 'Próximamente') return 'text-blue-500 border-blue-500';
+    if (status === 'Vigente') return 'text-green-500 border-green-500';
+    return 'text-red-500 border-red-500';
 }
 
 
@@ -161,75 +161,148 @@ const closeDeleteModal = () => {
 </script>
 
 <template>
+    <div class="w-full">
+        <!-- Action Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-emerald-400" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Gestión de Tarifas
+            </h1>
 
-    <div v-if="fees.length > 0" class="flex flex-col justify-center items-center gap-4 mt-4">
-        <NuxtLink :to="`/admin/products/${product_id}`" class="mt-4">
-            <button type="button"
-                class="text-white rounded-xl p-2 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-400 w-full">
+            <div class="flex items-center gap-3">
+                <NuxtLink :to="`/admin/products/${product_id}`" class="btn-secondary flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Volver al producto</span>
+                </NuxtLink>
+                <button v-if="!isCreatingNewFee" @click="isCreatingNewFee = true"
+                    class="btn-primary flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Añadir Tarifa</span>
+                </button>
+            </div>
+        </div>
 
-                <span>Volver al producto</span>
-            </button>
-        </NuxtLink>
-        <h1>Tarifas</h1>
         <div class="table-container">
-            <div class="table-header grid grid-cols-12 p-1">
-                <span class="col-span-3">Dia inicial</span>
-                <span class="col-span-3">Dia final</span>
+            <div class="table-header grid grid-cols-12 px-6 py-3">
+                <span class="col-span-3">Día inicial</span>
+                <span class="col-span-3">Día final</span>
                 <span class="col-span-2">Estado</span>
-                <span class="col-span-2">Precio</span>
-                <span class="col-span-2"></span>
+                <span class="col-span-2 text-right">Precio</span>
+                <span class="col-span-2 text-center">Acciones</span>
             </div>
-            <div class="flex justify-center items-center bg-black cursor-pointer"
-                v-on:click="() => isCreatingNewFee = true">
-                <p class="text-sm text-white">Crear tarifa</p>
-            </div>
-            <div v-if="isCreatingNewFee == true">
-                <form @submit.prevent="handleSubmitNew(newFee)">
-                    <div class="grid grid-cols-12 p-1 items-center h-12">
-                        <input v-model="newFee.start_day" class="col-span-3 w-1/2" type="date">
-                        <input v-model="newFee.end_day" class="col-span-3 w-1/2" type="date">
-                        <span class="col-span-2">Creando...</span>
-                        <input v-model="newFee.price" class="col-span-2 w-1/2" type="number" min="0" placeholder="1.99">
-                        <span class="col-span-2 flex justify-center items-center">
-                            <X type="submit" v-on:click="deleteNewFee"></X>
-                            <Check type="submit" v-on:click="handleSubmitNew"></Check>
-                        </span>
+
+            <!-- New Fee Form -->
+            <div v-if="isCreatingNewFee"
+                class="bg-indigo-500/5 border-b border-indigo-500/20 animate-in fade-in duration-300">
+                <form @submit.prevent="handleSubmitNew" class="grid grid-cols-12 px-6 py-4 items-center gap-4">
+                    <div class="col-span-3">
+                        <input v-model="newFee.start_day" type="date">
+                    </div>
+                    <div class="col-span-3">
+                        <input v-model="newFee.end_day" type="date">
+                    </div>
+                    <div class="col-span-2">
+                        <span class="text-xs font-semibold text-indigo-400 uppercase">Nueva</span>
+                    </div>
+                    <div class="col-span-2 relative">
+                        <span
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs text-white">€</span>
+                        <input v-model="newFee.price" type="number" step="0.01" min="0" placeholder="0.00" class="pl-7">
+                    </div>
+                    <div class="col-span-2 flex justify-center items-center gap-2">
+                        <button @click="deleteNewFee" type="button"
+                            class="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors">
+                            <X class="size-4"></X>
+                        </button>
+                        <button type="submit"
+                            class="p-2 rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+                            <Check class="size-4"></Check>
+                        </button>
                     </div>
                 </form>
             </div>
-            <div v-for="fee in fees" :key="fee.id">
 
-                <div v-if="editingId !== fee.id" class="grid grid-cols-12 p-1 items-center h-12">
-                    <span class="col-span-3">{{ getDate(fee.start_day) }}</span>
-                    <span class="col-span-3">{{ getDate(fee.end_day) }}</span>
-                    <span class="col-span-2" :class="getStatusClass(fee)">{{ getStatus(fee) }}</span>
-                    <span class="col-span-2">{{ fee.price }}</span>
-                    <span class="col-span-2 flex justify-center items-center">
-                        <Trash v-on:click="openDeleteModal(fee.id)"></Trash>
-                        <Pencil v-on:click="startEditing(fee)"></Pencil>
-                    </span>
+            <!-- Existing Fees -->
+            <div v-if="fees.length > 0">
+                <div v-for="fee in fees" :key="fee.id" class="">
+                    <!-- Display Mode -->
+                    <div v-if="editingId !== fee.id" class="grid grid-cols-12 px-6 py-4 items-center">
+                        <span class="col-span-3 text-slate-300">{{ getDate(fee.start_day) }}</span>
+                        <span class="col-span-3 text-slate-300">{{ getDate(fee.end_day) }}</span>
+                        <div class="col-span-2">
+                            <span :class="getStatusClass(fee)"
+                                class="text-xs font-medium px-2 py-0.5 rounded-full bg-current/10 border border-current/20">
+                                {{ getStatus(fee) }}
+                            </span>
+                        </div>
+                        <span class="col-span-2 text-right font-semibold text-white">{{ fee.price }} €</span>
+                        <div class="col-span-2 flex justify-center items-center gap-1">
+                            <button @click="startEditing(fee)"
+                                class="p-2 rounded-lg text-indigo-400 hover:bg-indigo-500/10 transition-colors"
+                                title="Editar">
+                                <Pencil class="size-4"></Pencil>
+                            </button>
+                            <button @click="openDeleteModal(fee.id)"
+                                class="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                                title="Eliminar">
+                                <Trash class="size-4"></Trash>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <form v-else @submit.prevent="handleSubmitUpdatebmit(fee)"
+                        class="grid grid-cols-12 px-6 py-4 items-center gap-4 bg-white/[0.02]">
+                        <div class="col-span-3">
+                            <input v-model="fee.start_day" type="date">
+                        </div>
+                        <div class="col-span-3">
+                            <input v-model="fee.end_day" type="date">
+                        </div>
+                        <div class="col-span-2">
+                            <span :class="getStatusClass(fee)"
+                                class="text-xs font-medium px-2 py-0.5 rounded-full bg-current/10 border border-current/20">
+                                {{ getStatus(fee) }}
+                            </span>
+                        </div>
+                        <div class="col-span-2 relative">
+                            <span
+                                class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs text-white">€</span>
+                            <input v-model="fee.price" type="number" step="0.01" min="0" class="pl-7">
+                        </div>
+                        <div class="col-span-2 flex justify-center items-center gap-2">
+                            <button @click="cancelEditing(fee)" type="button"
+                                class="p-2 rounded-lg text-slate-400 hover:bg-white/10 transition-colors">
+                                <X class="size-4"></X>
+                            </button>
+                            <button type="submit"
+                                class="p-2 rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+                                <Check class="size-4"></Check>
+                            </button>
+                        </div>
+                        <div v-if="errorMessages" class="col-span-12 mt-1">
+                            <p class="text-xs text-red-400">{{ errorMessages }}</p>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <form v-else @submit.prevent="handleSubmitUpdatebmit(fee)">
-                    <div class="grid grid-cols-12 p-1 items-center h-12">
-                        <input v-model="fee.start_day" class="col-span-3 w-1/2" type="date">
-                        <input v-model="fee.end_day" class="col-span-3 w-1/2" type="date">
-                        <span class="col-span-2" :class="getStatusClass(fee)">{{ getStatus(fee) }}</span>
-                        <input v-model="fee.price" class="col-span-2 w-1/2" type="number" min="0" placeholder="1.99">
-                        <span class="col-span-2 flex justify-center items-center">
-                            <X type="submit" v-on:click="cancelEditing(fee)"></X>
-                            <Check type="submit" v-on:click="handleSubmitUpdatebmit(fee)"></Check>
-                        </span>
-                    </div>
-                    <span v-if="errorMessages" class="error">{{ errorMessages }}</span>
-                </form>
-
+            <div v-else class="p-12 text-center">
+                <p class="text-slate-500 italic">No hay tarifas para este producto.</p>
             </div>
         </div>
     </div>
-    <div v-else>
-        <p>No hay tarifas</p>
-    </div>
+
     <DeleteModal v-if="isDeleteModalOpen" table="fees" :id="Number(feeToDelete)" @close="closeDeleteModal"
         :redirect="`/admin/products/${product_id}/fees`" />
 </template>
