@@ -111,7 +111,7 @@ const handleSubmit = async () => {
         // Subir fotos a Storage
         const uploadedUrls = []
         for (const file of photoFiles.value) {
-            const fileName = `${Date.now()}-${file.name}`
+            const fileName = `private/${Date.now()}-${file.name}`
             const { data: uploadData, error: uploadError } = await supabase
                 .storage
                 .from('products')

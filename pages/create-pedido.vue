@@ -86,10 +86,13 @@ const handleSubmit = async () => {
         formData.value.products = [];
         formData.value.date = '';
 
+        navigateTo('/');
+
     } catch (e) {
         error.value = e.message;
     } finally {
         loading.value = false;
+
     }
 };
 
@@ -142,7 +145,7 @@ const handleDeleteProduct = (product) => {
         <form @submit.prevent="handleSubmit" class="flex flex-col gap-6">
 
             <!-- Search box -->
-            <div class="card-glass p-5">
+            <div class="card-glass p-5 relative z-30">
                 <h2 class="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-400" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -155,7 +158,7 @@ const handleDeleteProduct = (product) => {
                     <input v-model="searchingProduct" type="text" name="search-bar" id="search-bar"
                         placeholder="Escribe el nombre del producto..." />
                     <div v-if="showingAllProducts.length > 0"
-                        class="dropdown-container absolute left-0 right-0 top-full z-10">
+                        class="dropdown-container absolute left-0 right-0 top-full !z-50">
                         <div v-for="product in showingAllProducts" :key="product.id" class="dropdown-item"
                             @click="selectProduct(product)">
                             {{ product.name }}

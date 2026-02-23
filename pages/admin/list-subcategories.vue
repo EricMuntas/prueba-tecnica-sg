@@ -69,7 +69,7 @@ const viewSelector = ref('categories');
                             stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
-                        Nuevo Categoría/Subcategoría
+                        Nueva Categoría/Subcategoría
                     </button>
                 </NuxtLink>
             </div>

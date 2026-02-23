@@ -372,7 +372,7 @@ const exportToPDF = async () => {
                         <span>Exportar PDF</span>
                     </button>
                     <NuxtLink :to="`/admin/products/${product_id}/fees`"
-                        class="btn-secondary flex items-center gap-2 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40">
+                        class="flex items-center gap-2 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -380,7 +380,7 @@ const exportToPDF = async () => {
                         </svg>
                         <span>Gestionar tarifas</span>
                     </NuxtLink>
-                    <NuxtLink to="/admin/list-products" class="btn-secondary flex items-center gap-2">
+                    <NuxtLink to="/admin/list-products" class="flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -390,10 +390,10 @@ const exportToPDF = async () => {
                 </div>
             </div>
 
-            <form @submit.prevent="handleSubmit" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Left Column: Basic Info & Categories -->
-                <div class="space-y-6">
-                    <div class="form-container">
+            <form @submit.prevent="handleSubmit" class="flex flex-col gap-8">
+                <!-- Row 1: Info general + Categorización side by side -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="form-container !max-w-none">
                         <h2
                             class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-indigo-400" fill="none"
@@ -417,7 +417,7 @@ const exportToPDF = async () => {
                         </div>
                     </div>
 
-                    <div class="form-container">
+                    <div class="form-container !max-w-none">
                         <h2
                             class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-amber-400" fill="none"
@@ -431,8 +431,10 @@ const exportToPDF = async () => {
                         <div class="form-items text-white">
                             <label for="categories" class="form-label">Añadir Categoría</label>
                             <select @change="handleCategoryChange" name="categories" id="categories">
-                                <option value="null" disabled selected>Selecciona una categoría...</option>
-                                <option v-for="category in categories" :key="category.id" :value="category.id">
+                                <option value="null" disabled selected class="text-black">Selecciona una categoría...
+                                </option>
+                                <option v-for="category in categories" :key="category.id" :value="category.id"
+                                    class="text-black">
                                     {{ category.name }}
                                 </option>
                             </select>
@@ -456,8 +458,10 @@ const exportToPDF = async () => {
                             class="form-items text-white mt-4 border-t border-white/5 pt-4">
                             <label for="subcategories" class="form-label">Añadir Subcategoría</label>
                             <select @change="handleSubcategoryChange" name="subcategories" id="subcategories">
-                                <option value="null" disabled selected>Selecciona una subcategoría...</option>
-                                <option v-for="sub in subcategoriesByCategory" :key="sub.id" :value="sub.id">
+                                <option value="null" disabled selected class="text-black">Selecciona una subcategoría...
+                                </option>
+                                <option v-for="sub in subcategoriesByCategory" :key="sub.id" :value="sub.id"
+                                    class="text-black">
                                     {{ sub.name }}
                                 </option>
                             </select>
@@ -479,116 +483,77 @@ const exportToPDF = async () => {
                     </div>
                 </div>
 
-                <!-- Right Column: Initial Fee & Photos -->
-                <div class="space-y-6">
-                    <div class="form-container">
-                        <h2
-                            class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-emerald-400" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Tarifa inicial
-                        </h2>
+                <!-- Row 2: Material visual (full width) -->
+                <div class="form-container !max-w-none">
+                    <h2
+                        class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-purple-400" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Material visual
+                    </h2>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="form-items text-white">
-                                <label for="start-day" class="form-label">Fecha inicio</label>
-                                <input v-model="formData.start_day" type="date" name="start-day" id="start-day">
+                    <div class="form-items text-white">
+                        <label for="photos" class="form-label">Actualizar fotos (Máx. 3)</label>
+                        <label class="photo-upload-zone group">
+                            <input type="file" id="photos" accept="image/*" multiple @change="handlePhotos"
+                                class="hidden">
+                            <div class="flex flex-col items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="size-8 text-slate-500 group-hover:text-indigo-400 transition-colors mb-2"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <span class="text-sm font-medium text-slate-400 group-hover:text-slate-300">Arrastra
+                                    o haz click para subir</span>
+                                <span class="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">Formatos:
+                                    JPG, PNG, WEBP</span>
                             </div>
-                            <div class="form-items text-white">
-                                <label for="end-day" class="form-label">Fecha fin</label>
-                                <input v-model="formData.end_day" type="date" name="end-day" id="end-day">
-                            </div>
+                        </label>
+
+                        <div v-if="photoFiles.length > 0" class="mt-4">
+                            <p class="text-xs font-semibold text-indigo-400 mb-2 uppercase tracking-wider">Archivos
+                                preparados:</p>
+                            <ul class="space-y-1">
+                                <li v-for="(file, idx) in photoFiles" :key="idx"
+                                    class="text-xs text-slate-400 flex items-center justify-between bg-white/5 px-2 py-1.5 rounded-lg border border-white/5">
+                                    <span class="truncate max-w-[150px]">{{ file.name }}</span>
+                                    <span class="text-[10px] text-slate-600">{{ (file.size / 1024).toFixed(1) }}
+                                        KB</span>
+                                </li>
+                            </ul>
                         </div>
-
-                        <div class="form-items text-white mt-2">
-                            <label for="price" class="form-label">Precio (€)</label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs">€</span>
-                                <input v-model="formData.price" type="number" step="0.01" min="0" name="price"
-                                    id="price" placeholder="0.00" class="pl-8">
-                            </div>
-                        </div>
-
-                        <p
-                            class="text-[10px] text-slate-500 mt-2 bg-white/5 p-2 rounded-lg leading-tight uppercase tracking-tight italic">
-                            Nota: Para editar tarifas históricas o añadir nuevas, utiliza el botón "Gestionar tarifas"
-                            en la cabecera.
-                        </p>
                     </div>
 
-                    <div class="form-container">
-                        <h2
-                            class="text-lg font-semibold text-white mb-2 flex items-center gap-2 border-b border-white/5 pb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-purple-400" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            Material visual
-                        </h2>
-
-                        <div class="form-items text-white">
-                            <label for="photos" class="form-label">Actualizar fotos (Máx. 3)</label>
-                            <label class="photo-upload-zone group">
-                                <input type="file" id="photos" accept="image/*" multiple @change="handlePhotos"
-                                    class="hidden">
-                                <div class="flex flex-col items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="size-8 text-slate-500 group-hover:text-indigo-400 transition-colors mb-2"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
-                                    <span class="text-sm font-medium text-slate-400 group-hover:text-slate-300">Arrastra
-                                        o haz click para subir</span>
-                                    <span class="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">Formatos:
-                                        JPG, PNG, WEBP</span>
-                                </div>
-                            </label>
-
-                            <div v-if="photoFiles.length > 0" class="mt-4">
-                                <p class="text-xs font-semibold text-indigo-400 mb-2 uppercase tracking-wider">Archivos
-                                    preparados:</p>
-                                <ul class="space-y-1">
-                                    <li v-for="(file, idx) in photoFiles" :key="idx"
-                                        class="text-xs text-slate-400 flex items-center justify-between bg-white/5 px-2 py-1.5 rounded-lg border border-white/5">
-                                        <span class="truncate max-w-[150px]">{{ file.name }}</span>
-                                        <span class="text-[10px] text-slate-600">{{ (file.size / 1024).toFixed(1) }}
-                                            KB</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <p class="text-[10px] text-slate-500 mt-2 italic leading-tight uppercase tracking-tight">
-                            Nota: Subir nuevas fotos reemplazará las actuales del producto.
-                        </p>
-                    </div>
-
-                    <div v-if="error || success" class="p-4 rounded-xl border"
-                        :class="error ? 'bg-red-500/10 border-red-500/20' : 'bg-emerald-500/10 border-emerald-500/20'">
-                        <p class="text-sm text-center font-medium" :class="error ? 'text-red-400' : 'text-emerald-400'">
-                            {{ error || success }}
-                        </p>
-                    </div>
-
-                    <div class="flex flex-col gap-3">
-                        <button type="submit" :disabled="loading"
-                            class="btn-primary w-full py-4 text-base flex items-center justify-center gap-3">
-                            <span v-if="loading"
-                                class="animate-spin size-5 border-2 border-white/30 border-t-white rounded-full"></span>
-                            <span>{{ loading ? 'Sincronizando...' : 'Guardar cambios' }}</span>
-                        </button>
-
-                        <button type="button" :disabled="loading" @click="openDeleteModal"
-                            class="w-full py-4 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-all font-semibold text-sm">
-                            Eliminar producto
-                        </button>
-                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2 italic leading-tight uppercase tracking-tight">
+                        Nota: Subir nuevas fotos reemplazará las actuales del producto.
+                    </p>
                 </div>
+
+                <!-- Row 3: Error/Success message -->
+                <div v-if="error || success" class="p-4 rounded-xl border"
+                    :class="error ? 'bg-red-500/10 border-red-500/20' : 'bg-emerald-500/10 border-emerald-500/20'">
+                    <p class="text-sm text-center font-medium" :class="error ? 'text-red-400' : 'text-emerald-400'">
+                        {{ error || success }}
+                    </p>
+                </div>
+
+                <!-- Row 4: Guardar (full width) -->
+                <button type="submit" :disabled="loading"
+                    class="btn-primary w-full py-4 text-base flex items-center justify-center gap-3">
+                    <span v-if="loading"
+                        class="animate-spin size-5 border-2 border-white/30 border-t-white rounded-full"></span>
+                    <span>{{ loading ? 'Sincronizando...' : 'Guardar cambios' }}</span>
+                </button>
+
+                <!-- Row 5: Eliminar (full width) -->
+                <button type="button" :disabled="loading" @click="openDeleteModal"
+                    class="w-full py-4 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-all font-semibold text-sm">
+                    Eliminar producto
+                </button>
             </form>
         </div>
 

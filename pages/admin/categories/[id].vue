@@ -100,7 +100,7 @@ const handleSubmit = async () => {
                     <h1 class="text-3xl font-bold text-white">Editar categoría</h1>
                     <p class="text-slate-400 text-sm mt-1">Modifica los detalles de la categoría</p>
                 </div>
-                <NuxtLink to="/admin/list-categories" class="btn-secondary flex items-center gap-2">
+                <NuxtLink to="/admin/list-categories" class="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
