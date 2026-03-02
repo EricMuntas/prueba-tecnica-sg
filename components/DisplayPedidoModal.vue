@@ -3,8 +3,10 @@ const props = defineProps({
     pedido: Object,
 })
 
-const pedido = ref(props.pedido);
+const pedido = ref(props.pedido)
 const emit = defineEmits(['close'])
+
+const supabase = useSupabaseClient()
 
 const closeModal = () => { emit('close') }
 
@@ -24,6 +26,75 @@ const formattedCost = computed(() => {
     const cost = pedido.value?.event?.extendedProps?.cost
     return cost != null ? `${Number(cost).toFixed(2)} €` : '—'
 })
+
+// ── Product lines ──────────────────────────────────────────
+const lines = ref([])
+const loadingLines = ref(true)
+
+const pedidoId = computed(() => pedido.value?.event?.extendedProps?.pedido_id)
+
+onMounted(async () => {
+    if (!pedidoId.value) return
+    try {
+        // 1. Get pedido_products rows
+        const { data: productLines, error: linesError } = await supabase
+            .from('pedidos_products')
+            .select('product_id, quantity')
+            .eq('pedido_id', pedidoId.value)
+
+        if (linesError) throw linesError
+
+        // 2. For each line get product name + current price (same logic as edit-pedido)
+        const today = new Date().toISOString().split('T')[0]
+
+        lines.value = await Promise.all(
+            productLines.map(async (line) => {
+                // Product name
+                const { data: product } = await supabase
+                    .from('products')
+                    .select('name')
+                    .eq('id', line.product_id)
+                    .single()
+
+                // Current fee price (vigente → most recent fallback)
+                let price = 0
+                const { data: vigente } = await supabase
+                    .from('fees')
+                    .select('price')
+                    .eq('product_id', line.product_id)
+                    .lte('start_day', today)
+                    .gte('end_day', today)
+                    .order('start_day', { ascending: false })
+                    .limit(1)
+                    .single()
+
+                if (vigente) {
+                    price = vigente.price
+                } else {
+                    const { data: reciente } = await supabase
+                        .from('fees')
+                        .select('price')
+                        .eq('product_id', line.product_id)
+                        .order('start_day', { ascending: false })
+                        .limit(1)
+                        .single()
+                    price = reciente?.price ?? 0
+                }
+
+                return {
+                    name: product?.name ?? 'Producto desconocido',
+                    quantity: line.quantity,
+                    price,
+                    total: Number(price) * line.quantity,
+                }
+            })
+        )
+    } catch (e) {
+        console.error('Error cargando líneas del pedido:', e)
+    } finally {
+        loadingLines.value = false
+    }
+})
 </script>
 
 <template>
@@ -32,7 +103,7 @@ const formattedCost = computed(() => {
         style="background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);" @click.self="closeModal">
 
         <!-- Modal card -->
-        <div class="card-glass w-full max-w-sm p-6 animate-modal">
+        <div class="card-glass w-full max-w-md p-6 animate-modal">
 
             <!-- Header -->
             <div class="flex items-center gap-3 mb-5">
@@ -51,16 +122,54 @@ const formattedCost = computed(() => {
             </div>
 
             <!-- Info rows -->
-            <div class="flex flex-col gap-3 mb-6">
+            <div class="flex flex-col gap-3 mb-5">
                 <div class="flex items-center justify-between py-2.5 px-3 rounded-xl"
                     style="background: rgba(255,255,255,0.04);">
-                    <span class="text-xs text-slate-400">Importe</span>
+                    <span class="text-xs text-slate-400">Importe total</span>
                     <span class="text-sm font-bold text-white">{{ formattedCost }}</span>
                 </div>
                 <div class="flex items-center justify-between py-2.5 px-3 rounded-xl"
                     style="background: rgba(255,255,255,0.04);">
                     <span class="text-xs text-slate-400">Fecha</span>
                     <span class="text-sm text-slate-200">{{ formattedDate }}</span>
+                </div>
+            </div>
+
+            <!-- Products section -->
+            <div class="mb-6">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Productos</p>
+
+                <!-- Loading -->
+                <div v-if="loadingLines" class="flex items-center justify-center py-6">
+                    <div class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+
+                <!-- Empty -->
+                <div v-else-if="lines.length === 0"
+                    class="text-center py-4 text-xs text-slate-500 rounded-xl"
+                    style="background: rgba(255,255,255,0.03);">
+                    Sin productos registrados
+                </div>
+
+                <!-- Table -->
+                <div v-else class="rounded-xl overflow-hidden" style="background: rgba(255,255,255,0.03);">
+                    <!-- Table header -->
+                    <div class="grid grid-cols-10 px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                        style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span class="col-span-5">Producto</span>
+                        <span class="col-span-2 text-center">Cant.</span>
+                        <span class="col-span-3 text-right">Total</span>
+                    </div>
+                    <!-- Rows -->
+                    <div v-for="(line, i) in lines" :key="i"
+                        class="grid grid-cols-10 px-3 py-2.5 items-center text-sm"
+                        :style="i < lines.length - 1 ? 'border-bottom: 1px solid rgba(255,255,255,0.04)' : ''">
+                        <span class="col-span-5 text-slate-200 font-medium truncate">{{ line.name }}</span>
+                        <span class="col-span-2 text-center text-slate-400">× {{ line.quantity }}</span>
+                        <span class="col-span-3 text-right font-semibold text-indigo-300">
+                            {{ line.total.toFixed(2) }} €
+                        </span>
+                    </div>
                 </div>
             </div>
 
